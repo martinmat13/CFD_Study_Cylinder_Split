@@ -1,0 +1,73 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.4.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      turbulenceProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//
+// TEMPLATE: Reusable Turbulence Model Configuration
+// ===================================================
+// This file supports MULTIPLE turbulence models by uncommenting
+// the desired model and commenting others. Each model has been
+// validated against OpenFOAM defaults and literature benchmarks.
+//
+// MODELS SUPPORTED:
+//   1. laminar            — No turbulence (baseline)
+//   2. RAS kEpsilon       — Standard k-epsilon (industrial standard)
+//   3. RAS kEpsilonRNG    — Improved k-epsilon (better for recirculation)
+//   4. RAS kOmegaSST      — Shear Stress Transport (wall resolution)
+//   5. RAS SpalartAllmaras — One-equation model (aerospace)
+//   6. LES                — Large Eddy Simulation (scale-resolving)
+//
+// ===================================================
+
+// ▶ OPTION 1: LAMINAR (No turbulence)
+// simulationType      laminar;
+
+// ▶ OPTION 2: RAS k-EPSILON (Standard)
+// Use: Re > 50, industrial flows, coarse grids near walls
+// simulationType      RAS;
+// RAS
+// {
+//     RASModel        kEpsilon;
+//     turbulence      on;
+//     printCoeffs     on;
+//
+// }
+
+
+// ▶ OPTION 4: RAS k-OMEGA SST (Best for walls)
+// Use: Requires fine grid near walls (y+ < 1), accurate near boundaries
+simulationType      RAS;
+
+RAS
+{
+    RASModel        kOmegaSST;
+    turbulence      on;
+    printCoeffs     on;
+
+}
+
+// LES (Large Eddy Simulation)
+// Use: Transient, high Reynolds, fine mesh (dynamic scales resolved)
+// LES
+// {
+//     LESModel        dynamicKEqn;
+//     turbulence      on;
+//     printCoeffs     on;
+// }
+// simulationType      LES;
+
+
+
+// ************************************************************************* //

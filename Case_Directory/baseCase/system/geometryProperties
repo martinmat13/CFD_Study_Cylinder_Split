@@ -1,0 +1,82 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2206 (or newer)                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      geometryProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// -------------------------------------------------------------------------
+// 1. INDEPENDENT PARAMETERS (Master Controls)
+// -------------------------------------------------------------------------
+
+D               0.1;                 // Cylinder diameter
+
+// A. Resolution Settings
+N_c             60;                  // Circumferential resolution around cylinder
+N_z             10;                  // Spanwise cells (1 for 2D, >1 for 3D)
+
+// B. Near-Wall Viscous Sublayer (Inner Prism O-Grid)
+N_bl            10;                  // Number of prism layers touching the wall
+E               1.5;                // Cell-to-cell growth rate in boundary layer
+R_prism_mult    0.6;                 // Width multiplier for the inner prism block
+
+// C. Far-Field Smoothness (Outer Transition & H-Grid)
+E_far           1.06;                // Target max volume jump between adjacent cells (6%)
+
+// -------------------------------------------------------------------------
+// 2. MATHEMATICALLY OPTIMIZED RELATIONS (Smooth Transitions)
+// -------------------------------------------------------------------------
+
+// --- Base Size Scales ---
+R               #calc "$D / 2.0";         
+R_prism         #calc "$D * $R_prism_mult"; 
+R_sq            #calc "$D * 1.5";           
+
+// --- Outer Domain Bounds (Optimized to eliminate blockage artifacts) ---
+X_min           #calc "-10 * $D";       // Upstream distance (-11.5D)
+X_max           #calc "20 * $D";        // Downstream wake distance (+18.5D)
+Y_min           #calc "-10 * $D";       // Bottom boundary distance (-11.5D)
+Y_max           #calc "10 * $D";         // Top boundary distance (+8.5D)
+
+Z_min           #calc "-0.5 * $D";     
+Z_max           #calc "0.5 * $D";      
+
+// --- Exact Cell-Size Matching at Interfaces ---
+// Computes exact boundary cell size of the outer O-grid to force seamless H-grid matching
+ds_outer        #calc "(3.0 * $D) / $N_c";
+
+// --- Dynamic Cell Count Allocations (Logarithmic expansion targeting E_far) ---
+N_trans         #calc "round($N_c * 0.4)"; 
+
+N_x1            #calc "round(log(1.0 + (10.5 * $D) * ($E_far - 1.0) / $ds_outer) / log($E_far))";
+N_x2            #calc "round(log(1.0 + (18.5 * $D) * ($E_far - 1.0) / $ds_outer) / log($E_far))";
+N_y1            #calc "round(log(1.0 + (8.5 * $D) * ($E_far - 1.0) / $ds_outer) / log($E_far))";
+N_y2            #calc "round(log(1.0 + (8.5 * $D) * ($E_far - 1.0) / $ds_outer) / log($E_far))";
+
+// --- Exact Edge Gradings ---
+BL_grading      #calc "pow($E, $N_bl - 1)"; 
+Trans_grading   #calc "pow($E_far, $N_trans - 1)";
+
+G_xMin          #calc "1.0 / pow($E_far, $N_x1 - 1)";
+G_xMax          #calc "pow($E_far, $N_x2 - 1)";
+G_yMin          #calc "1.0 / pow($E_far, $N_y1 - 1)";
+G_yMax          #calc "pow($E_far, $N_y2 - 1)";
+
+// --- Projections & References ---
+C               0.70710678118;            
+R_C             #calc "$D * 0.5 * 0.70710678118";          
+R_prism_C       #calc "$D * $R_prism_mult * 0.70710678118";    
+
+l_Ref           #calc "$D";               
+A_Ref           #calc "1.0 * $D * $D";          
+
+// ************************************************************************* //

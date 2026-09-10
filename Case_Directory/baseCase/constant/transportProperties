@@ -1,0 +1,25 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  Field         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   Operation     |                                                 |
+|   \\  /    And           | Transport Properties                            |
+|    \\/     Manipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      transportProperties;
+}
+
+// ************************************************************************* //
+// Fluid Model
+
+transportModel  Newtonian;
+nu              nu [0 2 -1 0 0 0 0] 1.5e-5; // Kinematic viscosity (m^2/s) for air at 20°C
+
+
+// ************************************************************************* //

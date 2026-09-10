@@ -1,0 +1,245 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2206 (or newer)                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "geometryProperties"
+
+scale   1;
+
+// -------------------------------------------------------------------------
+// 3. VERTICES
+// -------------------------------------------------------------------------
+
+vertices
+(
+    // === Z_min Plane (z = Z_min) ===
+
+    // 0-3: Cylinder Wall (Inner O-Grid boundary)
+    ( $R_C         -$R_C         $Z_min)    // 0: Bottom-Right
+    ( $R_C          $R_C         $Z_min)    // 1: Top-Right
+    (-$R_C          $R_C         $Z_min)    // 2: Top-Left
+    (-$R_C         -$R_C         $Z_min)    // 3: Bottom-Left
+
+    // 4-7: NEW Prism Boundary (Outer O-Grid boundary)
+    ( $R_prism_C   -$R_prism_C   $Z_min)    // 4: Bottom-Right
+    ( $R_prism_C    $R_prism_C   $Z_min)    // 5: Top-Right
+    (-$R_prism_C    $R_prism_C   $Z_min)    // 6: Top-Left
+    (-$R_prism_C   -$R_prism_C   $Z_min)    // 7: Bottom-Left
+
+    // 8-11: O-grid Outer Square
+    ( $R_sq        -$R_sq        $Z_min)    // 8: Bottom-Right
+    ( $R_sq         $R_sq        $Z_min)    // 9: Top-Right
+    (-$R_sq         $R_sq        $Z_min)    // 10: Top-Left
+    (-$R_sq        -$R_sq        $Z_min)    // 11: Bottom-Left
+
+    // 12-23: Far-field Outer Boundary 
+    ( $X_max  $Y_max $Z_min)  // 12: Top-Right Corner
+    ( $R_sq   $Y_max $Z_min)  // 13: Top-Mid-Right
+    (-$R_sq   $Y_max $Z_min)  // 14: Top-Mid-Left
+    ( $X_min  $Y_max $Z_min)  // 15: Top-Left Corner
+
+    ( $X_max  $R_sq  $Z_min)  // 16: Right-Mid-Top
+    ( $X_min  $R_sq  $Z_min)  // 17: Left-Mid-Top
+
+    ( $X_max -$R_sq  $Z_min)  // 18: Right-Mid-Bottom
+    ( $X_min -$R_sq  $Z_min)  // 19: Left-Mid-Bottom
+
+    ( $X_max  $Y_min $Z_min)  // 20: Bottom-Right Corner
+    ( $R_sq   $Y_min $Z_min)  // 21: Bottom-Mid-Right
+    (-$R_sq   $Y_min $Z_min)  // 22: Bottom-Mid-Left
+    ( $X_min  $Y_min $Z_min)  // 23: Bottom-Left Corner
+
+
+    // === Z_max Plane (z = Z_max, add 24 to index) ===
+
+    // 24-27: Cylinder Wall
+    ( $R_C         -$R_C         $Z_max)    // 24
+    ( $R_C          $R_C         $Z_max)    // 25
+    (-$R_C          $R_C         $Z_max)    // 26
+    (-$R_C         -$R_C         $Z_max)    // 27
+
+    // 28-31: NEW Prism Boundary
+    ( $R_prism_C   -$R_prism_C   $Z_max)    // 28
+    ( $R_prism_C    $R_prism_C   $Z_max)    // 29
+    (-$R_prism_C    $R_prism_C   $Z_max)    // 30
+    (-$R_prism_C   -$R_prism_C   $Z_max)    // 31
+
+    // 32-35: O-grid Outer Square
+    ( $R_sq        -$R_sq        $Z_max)    // 32
+    ( $R_sq         $R_sq        $Z_max)    // 33
+    (-$R_sq         $R_sq        $Z_max)    // 34
+    (-$R_sq        -$R_sq        $Z_max)    // 35
+
+    // 36-47: Far-field Outer Boundary
+    ( $X_max  $Y_max $Z_max)  // 36
+    ( $R_sq   $Y_max $Z_max)  // 37
+    (-$R_sq   $Y_max $Z_max)  // 38
+    ( $X_min  $Y_max $Z_max)  // 39
+
+    ( $X_max  $R_sq  $Z_max)  // 40
+    ( $X_min  $R_sq  $Z_max)  // 41
+
+    ( $X_max -$R_sq  $Z_max)  // 42
+    ( $X_min -$R_sq  $Z_max)  // 43
+
+    ( $X_max  $Y_min $Z_max)  // 44
+    ( $R_sq   $Y_min $Z_max)  // 45
+    (-$R_sq   $Y_min $Z_max)  // 46
+    ( $X_min  $Y_min $Z_max)  // 47
+);
+
+// -------------------------------------------------------------------------
+// 4. BLOCKS
+// -------------------------------------------------------------------------
+
+blocks
+(
+    // === INNER O-GRID (The tight prism layer) ===
+    hex ( 0  4  5  1  24 28 29 25) ($N_bl $N_c $N_z) simpleGrading ($BL_grading 1 1) // Right
+    hex ( 1  5  6  2  25 29 30 26) ($N_bl $N_c $N_z) simpleGrading ($BL_grading 1 1) // Top
+    hex ( 2  6  7  3  26 30 31 27) ($N_bl $N_c $N_z) simpleGrading ($BL_grading 1 1) // Left
+    hex ( 3  7  4  0  27 31 28 24) ($N_bl $N_c $N_z) simpleGrading ($BL_grading 1 1) // Bottom
+
+    // === OUTER O-GRID (The transition layer) ===
+    hex ( 4  8  9  5  28 32 33 29) ($N_trans $N_c $N_z) simpleGrading ($Trans_grading 1 1) // Right
+    hex ( 5  9 10  6  29 33 34 30) ($N_trans $N_c $N_z) simpleGrading ($Trans_grading 1 1) // Top
+    hex ( 6 10 11  7  30 34 35 31) ($N_trans $N_c $N_z) simpleGrading ($Trans_grading 1 1) // Left
+    hex ( 7 11  8  4  31 35 32 28) ($N_trans $N_c $N_z) simpleGrading ($Trans_grading 1 1) // Bottom
+
+    // === OUTER H-GRID (Far Field) ===
+    // Bottom-Left
+    hex (23 22 11 19  47 46 35 43) ($N_x1 $N_y1 $N_z) simpleGrading ($G_xMin $G_yMin 1)
+    // Bottom-Mid
+    hex (22 21  8 11  46 45 32 35) ($N_c  $N_y1 $N_z) simpleGrading (1 $G_yMin 1)
+    // Bottom-Right
+    hex (21 20 18  8  45 44 42 32) ($N_x2 $N_y1 $N_z) simpleGrading ($G_xMax $G_yMin 1)
+    
+    // Left-Mid
+    hex (19 11 10 17  43 35 34 41) ($N_x1 $N_c  $N_z) simpleGrading ($G_xMin 1 1)
+    // Right-Mid
+    hex ( 8 18 16  9  32 42 40 33) ($N_x2 $N_c  $N_z) simpleGrading ($G_xMax 1 1)
+    
+    // Top-Left
+    hex (17 10 14 15  41 34 38 39) ($N_x1 $N_y2 $N_z) simpleGrading ($G_xMin $G_yMax 1)
+    // Top-Mid
+    hex (10  9 13 14  34 33 37 38) ($N_c  $N_y2 $N_z) simpleGrading (1 $G_yMax 1)
+    // Top-Right
+    hex ( 9 16 12 13  33 40 36 37) ($N_x2 $N_y2 $N_z) simpleGrading ($G_xMax $G_yMax 1)
+);
+
+// -------------------------------------------------------------------------
+// 5. CURVED EDGES
+// -------------------------------------------------------------------------
+
+edges
+(
+    // Inner Cylinder Z_min
+    arc  0  1 ( $R   0 $Z_min)
+    arc  1  2 (  0  $R $Z_min)
+    arc  2  3 (-$R   0 $Z_min)
+    arc  3  0 (  0 -$R $Z_min)
+
+    // NEW: Prism Boundary Z_min
+    arc  4  5 ( $R_prism   0 $Z_min)
+    arc  5  6 (  0  $R_prism $Z_min)
+    arc  6  7 (-$R_prism   0 $Z_min)
+    arc  7  4 (  0 -$R_prism $Z_min)
+
+    // Inner Cylinder Z_max
+    arc 24 25 ( $R   0 $Z_max)
+    arc 25 26 (  0  $R $Z_max)
+    arc 26 27 (-$R   0 $Z_max)
+    arc 27 24 (  0 -$R $Z_max)
+
+    // NEW: Prism Boundary Z_max
+    arc 28 29 ( $R_prism   0 $Z_max)
+    arc 29 30 (  0  $R_prism $Z_max)
+    arc 30 31 (-$R_prism   0 $Z_max)
+    arc 31 28 (  0 -$R_prism $Z_max)
+);
+
+// -------------------------------------------------------------------------
+// 6. BOUNDARIES
+// -------------------------------------------------------------------------
+
+boundary
+(
+    cylinder
+    {
+        type wall;
+        faces
+        (
+            (0 24 25 1)
+            (1 25 26 2)
+            (2 26 27 3)
+            (3 27 24 0)
+        );
+    }
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (23 19 43 47)
+            (19 17 41 43)
+            (17 15 39 41)
+        );
+    }
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (20 44 42 18)
+            (18 42 40 16)
+            (16 40 36 12)
+        );
+    }
+    topAndBottom
+    {
+        type wall; 
+        faces
+        (
+            (15 14 38 39) (14 13 37 38) (13 12 36 37) // Top
+            (23 47 46 22) (22 46 45 21) (21 45 44 20) // Bottom
+        );
+    }
+    frontAndBack
+    {
+        type wall; 
+        faces
+        (
+            // Z_min faces (Clockwise)
+            (0 1 5 4) (1 2 6 5) (2 3 7 6) (3 0 4 7)       // Inner O-grid
+            (4 5 9 8) (5 6 10 9) (6 7 11 10) (7 4 8 11)   // Outer O-grid
+            (23 19 11 22) (22 11 8 21) (21 8 18 20)       // Bot H-grid
+            (19 17 10 11) (8 9 16 18)                     // Mid H-grid
+            (17 15 14 10) (10 14 13 9) (9 13 12 16)       // Top H-grid
+            
+            // Z_max faces (Counter-Clockwise)
+            (24 28 29 25) (25 29 30 26) (26 30 31 27) (27 31 28 24)
+            (28 32 33 29) (29 33 34 30) (30 34 35 31) (31 32 28 35) // Fixed normal direction
+            (47 46 35 43) (46 45 32 35) (45 44 42 32)
+            (43 35 34 41) (32 42 40 33)
+            (41 34 38 39) (34 33 37 38) (33 40 36 37)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

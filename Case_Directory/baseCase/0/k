@@ -1,0 +1,62 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.4.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      k;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Turbulent kinetic energy (k)
+// Used in both k-epsilon and k-omega SST models
+// Wall function BC: kqRWallFunction integrates k distribution from wall shear
+
+dimensions      [0 2 -2 0 0 0 0];
+
+#include "include/turbulenceInit"
+
+internalField   uniform $k_0;
+
+boundaryField
+{
+    inlet
+    {
+        // Freestream turbulent kinetic energy from 1% turbulence intensity
+        // k_0 = 1.5 * TI^2 * U^2 (standard definition for uniform inlet)
+        type        fixedValue;
+        value       uniform $k_0;
+    }
+
+    outlet
+    {
+        // Free development of k downstream of cylinder
+        type        zeroGradient;
+    }
+
+    cylinder
+    {
+        // kqRWallFunction: Wall function for k using wall shear stress
+        // Compatible with both k-epsilon and k-omega SST models
+        // Computes k from boundary layer theory based on u_tau
+        type        kqRWallFunction;
+        value       uniform 0;
+    }
+
+    topAndBottom
+    {
+        type        slip;
+    }
+
+    frontAndBack
+    {
+        type        slip;
+    }
+}
+
+// ************************************************************************* //

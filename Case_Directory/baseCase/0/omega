@@ -1,0 +1,64 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.4.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      omega;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// CRITICAL FOR SST: Specific dissipation rate (omega = epsilon/k)
+// Units: [1/time], typical range: 1-1000 rad/s depending on Re
+// Must be > 0 everywhere; initialization from turbulenceInit file
+
+dimensions      [0 0 -1 0 0 0 0];
+
+#include "include/turbulenceInit"
+
+internalField   uniform $omega_0;
+
+boundaryField
+{
+    inlet
+    {
+        // Freestream omega from turbulence intensity initialization
+        // omega_0 calculated to be consistent with k_0: omega = epsilon/(C_mu*k)
+        type        fixedValue;
+        value       uniform $omega_0;
+    }
+
+    outlet
+    {
+        // Free development of omega downstream
+        type        zeroGradient;
+    }
+
+    cylinder
+    {
+        // SST-SPECIFIC WALL FUNCTION (REQUIRED for SST model)
+        // omegaWallFunction: Computes omega from wall distance & wall shear
+        // Critical for proper SST blending in viscous sublayer (y+ < 1)
+        // Prevents omega from becoming too large near wall
+        // DO NOT use standard wallFunction; use SST-specific omegaWallFunction
+        type        omegaWallFunction;
+        value       uniform 0;
+    }
+
+    topAndBottom
+    {
+        type        slip;
+    }
+    
+    frontAndBack
+    {
+        type        slip;
+    }
+}
+
+// ************************************************************************* //

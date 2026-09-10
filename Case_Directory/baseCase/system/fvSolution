@@ -1,0 +1,126 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.4.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    p
+    {
+        solver          GAMG;
+        smoother        symGaussSeidel;
+        tolerance       1e-06;
+        relTol          0.05;
+    }
+
+    pFinal
+    {
+        $p;
+        relTol          0.0;
+    }
+
+    U
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-07;
+        relTol          0.05;
+    }
+    
+    UFinal
+    {
+        $U;
+        relTol          0;
+    }
+
+    k
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-07;
+        relTol          0.05;
+    }
+
+    kFinal
+    {
+        $k;
+        relTol          0;
+    }
+
+    omega
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-07;
+        relTol          0.05;
+    }
+
+    omegaFinal
+    {
+        $omega;
+        relTol          0;
+    }
+
+}
+
+SIMPLE
+{
+    nNonOrthogonalCorrectors 0;
+    consistent      yes;
+
+    residualControl
+    {
+        p               1e-6;
+        U               1e-6;
+    }
+}
+
+PISO
+{
+    nCorrectors     3;
+    nNonOrthogonalCorrectors 0;
+    pRefCell 0;
+    pRefValue 0;  
+}
+
+PIMPLE
+{
+    nOuterCorrectors        2;
+    nCorrectors             2;
+    nNonOrthogonalCorrectors 0;
+    residualControl
+    {
+        U		{relTol 0; tolerance 1e-05; }
+        p		{relTol 0; tolerance 1e-05; }
+        k		{relTol 0; tolerance 1e-05; }
+        omega	{relTol 0; tolerance 1e-05; }
+    }
+    pRefCell                0;
+    pRefValue               0;
+    momentumPredictor       yes;
+}
+
+relaxationFactors
+{
+    fields
+    {
+        p   0.3;
+    }
+    equations
+    {
+        U   0.7;
+        k   0.7;
+        omega 0.7;
+    }
+}

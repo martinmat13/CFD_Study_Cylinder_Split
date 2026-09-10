@@ -1,0 +1,60 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.4.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      nut;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 2 -1 0 0 0 0];
+
+#include "include/turbulenceInit"
+
+internalField   uniform 0;
+
+boundaryField
+{
+    inlet
+    {
+        // Inlet turbulent eddy viscosity calculated from k and omega
+        type            calculated;
+        value           uniform 0;
+    }
+
+    outlet
+    {
+        // Free development of eddy viscosity downstream
+        type            zeroGradient;
+    }
+
+    cylinder
+    {
+        // SST-SPECIFIC WALL TREATMENT (y+ < 1 required)
+        // nutkWallFunction: Integrates k-omega blending with wall damping
+        // Ensures proper nut→0 at wall for viscous sublayer resolution
+        // Alternative (not recommended): nutUSpaldingWallFunction (universal log-law)
+        type            nutkWallFunction;
+        value           uniform 0;
+    }
+
+    topAndBottom
+    {
+        type        slip;
+    }
+
+
+    frontAndBack
+    {
+        type        slip;
+    }
+}
+
+// ************************************************************************* //

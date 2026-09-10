@@ -1,0 +1,29 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.4.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+#include        "../../system/geometryProperties"
+// Turbulence Initial Conditions
+// Reference: k = 0.015*U^2, omega = k/(0.09*nu_t)
+// Typical initialization: TI = 1% (turbulence intensity)
+// Turbulent intensity and viscosity ratio
+Uinlet          INLET_U;
+TI              0.01;          // Turbulence intensity (1%)
+mu_t_ratio      10;            // mu_t / mu ratio (~10 for moderate turbulence)
+L               #calc "0.07 * $D";   
+// Calculate k from turbulence intensity: k = (3/2) * (U * TI)^2
+k_0             #calc "1.5 * $TI * $TI * $Uinlet * $Uinlet";
+
+epsilon_0       #calc "pow(0.09, 0.75) * pow($k_0, 1.5) / $L";
+
+// Calculate omega from: omega = k^0.5 / (C_mu^0.25 * L) or omega = k / (C_mu * nu_t)
+omega_0         #calc "pow($k_0, 0.5) / (pow(0.09, 0.25) * $L)"; // Using length scale
+
+// Spalart-Allmaras: nuTilda = mu_t / rho (eddy viscosity)
+nuTilda_0       #calc "$mu_t_ratio * 1.5e-5";
+    
+// ************************************************************************* //
