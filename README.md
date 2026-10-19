@@ -16,7 +16,7 @@ This work was developed as part of a research internship at the University of Sp
 
 * **Automated Post-Processing:** Python scripts automatically extract drag/lift coefficients, Strouhal numbers, $y^+$ values, and generate comparative plots.
 
-## Repository Structure
+## Case Structure
 
 ```
 .
